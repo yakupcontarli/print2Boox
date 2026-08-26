@@ -1,103 +1,27 @@
 /*
- * chrome printer provider
+ * chrome printer provider - Manifest V3 Service Worker
  */
 'use strict';
 
-const notification_icon = "images/icon-128.png";
+// Service Worker ortamında eksik olan global DOM nesneleri için uyumluluk shimi
+self.window = self;
+self.document = {
+  location: {
+    protocol: 'https:'
+  }
+};
+var document = self.document;
+var window = self;
 
+importScripts('aliyun-oss-sdk-6.0.0.min.js');
+
+const ga = function(...args) {
+  console.log('[Analytics]:', ...args);
+};
+
+const notification_icon = "images/icon-128.png";
 const { version: VERSION } = chrome.runtime.getManifest();
 
-function verBigger(vb, vl, equal){
-  if( vb === vl ){
-    return !!equal;
-  }
-  const [vb1, vb2, vb3] = vb.split('.').map(s => parseInt(s) || 0);
-  const [vl1, vl2, vl3] = vl.split('.').map(s => parseInt(s) || 0);
-
-  if( vb1 < vl1 ){
-    return false;
-  }else if( vb2 < vl2 ){
-    return false;
-  }else if( vb3 < vl3 ){
-    return false;
-  }
-  return true;
-}
-
-chrome.runtime.onInstalled.addListener(function(details) {
-  const {reason, previousVersion} = details;
-  ga('send', 'event', 'onInstalled', VERSION, reason, previousVersion);
-  if( reason === 'update' ){
-    // 0.0.8 2021-03-21 跟随BOOX官网更新，修正登录逻辑
-    if( verBigger('0.0.8', previousVersion) ){
-      chrome.notifications.create('installed'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: chrome.i18n.getMessage("update_installed", [VERSION]), 
-        message: chrome.i18n.getMessage("update_comment_0_0_8"),
-        //expandedMessage: "",
-        priority: 1,
-      }, function(nid){
-        // 4s 后自动关闭
-        setTimeout(() => {
-          chrome.notifications.clear(nid);
-        }, 10000)
-      });
-    }
-    // 0.0.6 增加了bucket逻辑，国外用户应该可以正常使用了
-    if( verBigger('0.0.6', previousVersion) ){
-      chrome.notifications.create('installed'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: chrome.i18n.getMessage("update_installed", [VERSION]), 
-        message: chrome.i18n.getMessage("update_comment_0_0_6"),
-        //expandedMessage: "",
-        priority: 1,
-      }, function(nid){
-        // 4s 后自动关闭
-        setTimeout(() => {
-          chrome.notifications.clear(nid);
-        }, 10000)
-      });
-    }
-    // 0.0.5 增加了新版官网的支持，并支持push.boox.com网站账号
-    if( verBigger('0.0.5', previousVersion) ){
-      chrome.notifications.create('installed'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: chrome.i18n.getMessage("update_installed"),
-        message: chrome.i18n.getMessage("update_comment_0_0_5"),
-        //expandedMessage: "",
-        priority: 1,
-      }, function(nid){
-        // 4s 后自动关闭
-        setTimeout(() => {
-          chrome.notifications.clear(nid);
-        }, 10000)
-      });
-    }
-    // 0.0.3 icon链接错了 导致notification都不出了，这里提示一下
-    if( previousVersion === '0.0.3' ){
-      chrome.notifications.create('loginSuccess'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: "Bug fixed",
-        message: 'Bug fixed! Now, notification will pop-up when you print.',
-        //expandedMessage: "",
-        priority: 1,
-      }, function(nid){
-        // 4s 后自动关闭
-        setTimeout(() => {
-          chrome.notifications.clear(nid);
-        }, 10000)
-      });
-    }
-  }
-
-  return;
-});
-
-// copy from send2boox.app.js
 const Util = {
   guid: function guid() {
     return Util.s4() + Util.s4() + '-' + Util.s4() + '-' + Util.s4() + '-' + Util.s4() + '-' + Util.s4() + Util.s4() + Util.s4();
@@ -110,171 +34,333 @@ const Util = {
   }
 };
 
-var CAPABILITIES = ' {      "version": "1.0",      "printer": {       "supported_content_type": [          {"content_type": "application/pdf","min_version":"1.5","max_version":"1.5"},          {"content_type": "image/pwg-raster"}        ],        "copies": {          "default": 1,          "max": 100        },        "color":{          "option": [            {"type":  "STANDARD_COLOR", "is_default":  true},            {"type":  "STANDARD_MONOCHROME"}          ]        },        "duplex":{          "option": [            {"type": "NO_DUPLEX", "is_default":  true },            {"type": "LONG_EDGE"},            {"type": "SHORT_EDGE"}          ]        },        "collate": { "default": true},        "page_orientation":{"option":[{"type":"PORTRAIT","is_default":true},{"type":"LANDSCAPE"}]},        "margins":{"option":[{"type":"BORDERLESS","top":0,"left":0,"right":0,"bottom":0},{"type":"STANDARD","is_default":true},{"type":"CUSTOM"}]},        "media_size": {      "option": [        {          "name": "ISO_A4",          "width_microns": 210000,          "height_microns": 297000,          "is_default": false        },         {          "name": "ISO_A5",          "width_microns": 105000,          "height_microns": 148500,          "is_default": false        },        {          "name": "NA_INDEX_4X6",          "width_microns": 100000,          "height_microns": 150000        },        {          "name": "NA_LETTER",          "width_microns": 215900,          "height_microns": 279400,          "is_default": true        }      ]    }      }    } ';
+const CAPABILITIES = ' {      "version": "1.0",      "printer": {       "supported_content_type": [          {"content_type": "application/pdf","min_version":"1.5","max_version":"1.5"},          {"content_type": "image/pwg-raster"}        ],        "copies": {          "default": 1,          "max": 100        },        "color":{          "option": [            {"type":  "STANDARD_COLOR", "is_default":  true},            {"type":  "STANDARD_MONOCHROME"}          ]        },        "duplex":{          "option": [            {"type": "NO_DUPLEX", "is_default":  true },            {"type": "LONG_EDGE"},            {"type": "SHORT_EDGE"}          ]        },        "collate": { "default": true},        "page_orientation":{"option":[{"type":"PORTRAIT","is_default":true},{"type":"LANDSCAPE"}]},        "margins":{"option":[{"type":"BORDERLESS","top":0,"left":0,"right":0,"bottom":0},{"type":"STANDARD","is_default":true},{"type":"CUSTOM"}]},        "media_size": {      "option": [        {          "name": "ISO_A4",          "width_microns": 210000,          "height_microns": 297000,          "is_default": false        },         {          "name": "ISO_A5",          "width_microns": 105000,          "height_microns": 148500,          "is_default": false        },        {          "name": "NA_INDEX_4X6",          "width_microns": 100000,          "height_microns": 150000        },        {          "name": "NA_LETTER",          "width_microns": 215900,          "height_microns": 279400,          "is_default": true        }      ]    }      }    } ';
 const cdd = JSON.parse(CAPABILITIES);
 
-const openedTabs = {
-  /* tabId: any */
-};
+const openedTabs = {};
+
+// Sağ tık menüsü oluştur
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "boox_push_page",
+    title: "Bu Sayfayı Boox'a Gönder (PushRead)",
+    contexts: ["page", "link"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "boox_push_page") {
+    const targetUrl = info.linkUrl || info.pageUrl || tab?.url;
+    const targetTitle = tab?.title || "Web Sayfası";
+    if (targetUrl) {
+      pushUrlToBoox(targetUrl, targetTitle);
+    }
+  }
+});
 
 async function gotoLogin(domain){
   if( !domain ){
     throw new Error('gotoLogin need domain!');
   }
-  // 用户点击确认后 新开tab去登录
-  // 只管打开，不管是否登录成功，
-  // 后面webRequest的监听会异步等待登录成功
   chrome.tabs.create({
     active: true,
-    url: `http://${domain}/`,
+    url: `https://${domain}/`,
   }, function(tab) {
-    // 只有记录到这里的tabId 触发登录成功才会弹出notification
-    openedTabs[tab.id] = tab;
-
+    if (tab && tab.id) {
+      openedTabs[tab.id] = tab;
+    }
   });
 }
 
-// 我们打开的tab 再弹出的tab 也要记录一下
-// 比如 网站登录时选择“微信登录”会新开tab
+// Token doğrulama ve kullanıcı bilgilerini kaydetme
+async function verifyAndSaveUser(token, siteDomain, extraDevices) {
+  if (!token || !siteDomain) return false;
+
+  console.log(`Verifying token for domain: ${siteDomain}`);
+  try {
+    const rawToken = token.replace(/^Bearer\s+/i, '');
+    let res = await fetch(`https://${siteDomain}/api/1/users/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${rawToken}`
+      }
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      res = await fetch(`https://${siteDomain}/api/1/users/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': rawToken
+        }
+      });
+    }
+
+    if (!res.ok) {
+      console.warn(`User check returned status ${res.status}`);
+      return false;
+    }
+
+    const json = await res.json();
+    if (json && json.data) {
+      const uid = json.data.uid || json.data.userUid || json.data.id;
+      const user = {
+        boox_auth_token: rawToken,
+        siteDomain: siteDomain,
+        token: rawToken,
+        userName: json.data.nickname || json.data.email || json.data.username || 'Boox User',
+        userId: json.data.id,
+        userUid: String(uid),
+        avatarUrl: json.data.avatarUrl || '',
+        version: VERSION
+      };
+
+      if (extraDevices && extraDevices.length > 0) {
+        user.userDevices = extraDevices;
+      }
+
+      await chrome.storage.local.set(user);
+      console.log('User verified and saved:', user);
+
+      chrome.notifications.create('loginSuccess' + Date.now(), {
+        type: "basic",
+        iconUrl: notification_icon,
+        title: "Print to Boox",
+        message: `Giriş başarılı: ${user.userName} (${siteDomain})`,
+        priority: 1
+      }, (nid) => {
+        setTimeout(() => { chrome.notifications.clear(nid); }, 4000);
+      });
+
+      return true;
+    }
+  } catch (err) {
+    console.error('verifyAndSaveUser error:', err);
+  }
+  return false;
+}
+
+// Sekmeleri tarayıp açık Boox sekmelerinden token çekme
+async function scanOpenBooxTabs() {
+  const tabs = await chrome.tabs.query({
+    url: [
+      "*://*.boox.com/*",
+      "*://*.send2boox.com/*"
+    ]
+  });
+
+  for (const tab of tabs) {
+    if (!tab.id) continue;
+    try {
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          let tok = null;
+          let devs = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const val = localStorage.getItem(key);
+            if (!val) continue;
+            const lk = key.toLowerCase();
+            if (lk === 'token' || lk === 'auth_token' || lk === 'access_token' || lk === 'onyx_token') {
+              if (typeof val === 'string' && val.length > 8 && !val.startsWith('{')) {
+                tok = val.replace(/^Bearer\s+/i, '').replace(/^"|"$/g, '');
+              }
+            }
+            if (val.startsWith('{') || val.startsWith('[')) {
+              try {
+                const obj = JSON.parse(val);
+                const findTok = (o) => {
+                  if (!o || typeof o !== 'object') return null;
+                  if (o.token && typeof o.token === 'string' && o.token.length > 8) return o.token;
+                  if (o.accessToken && typeof o.accessToken === 'string' && o.accessToken.length > 8) return o.accessToken;
+                  if (o.auth_token && typeof o.auth_token === 'string' && o.auth_token.length > 8) return o.auth_token;
+                  for (const k in o) {
+                    const found = findTok(o[k]);
+                    if (found) return found;
+                  }
+                  return null;
+                };
+                if (!tok) {
+                  const f = findTok(obj);
+                  if (f) tok = f.replace(/^Bearer\s+/i, '').replace(/^"|"$/g, '');
+                }
+
+                const findDevs = (o) => {
+                  if (!o || typeof o !== 'object') return null;
+                  if (Array.isArray(o)) {
+                    const devList = o.filter(item => item && (item.mac || item.deviceModel || item.model || item.sn));
+                    if (devList.length > 0) return devList;
+                  }
+                  for (const k in o) {
+                    if (k.toLowerCase().includes('device') || k.toLowerCase().includes('bind')) {
+                      const res = findDevs(o[k]);
+                      if (res) return res;
+                    }
+                  }
+                  return null;
+                };
+                const fd = findDevs(obj);
+                if (fd && fd.length > 0) devs = fd;
+              } catch(e){}
+            }
+          }
+          return {
+            token: tok,
+            domain: window.location.hostname,
+            devices: devs
+          };
+        }
+      });
+
+      const res = results?.[0]?.result;
+      if (res && res.token && res.domain) {
+        const ok = await verifyAndSaveUser(res.token, res.domain, res.devices);
+        if (ok) return true;
+      }
+    } catch (e) {
+      console.warn('Could not inspect tab:', tab.id, e);
+    }
+  }
+  return false;
+}
+
+// URL'yi doğrudan Boox PushRead servisine gönderme (HAR Analizi ile Çözümlenen Endpoint)
+async function pushUrlToBoox(url, title) {
+  try {
+    const { token, siteDomain } = await getToken();
+    const API_PREFIX = `https://${siteDomain}/api/1`;
+    const rawToken = token.replace(/^Bearer\s+/i, '');
+
+    const payload = {
+      url: url,
+      parentFolder: null
+    };
+
+    console.log('Sending URL to Boox PushRead (/webpage/url):', payload);
+
+    let res = await fetch(`${API_PREFIX}/webpage/url`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${rawToken}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      res = await fetch(`${API_PREFIX}/webpage/url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': rawToken
+        },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    let json = null;
+    try {
+      json = await res.json();
+    } catch(e) {}
+
+    console.log('pushUrl response:', res.status, json);
+
+    if (res.ok && json && (json.result_code === 0 || json.code === 0 || json.code === 200)) {
+      chrome.notifications.create('pushUrlSuccess' + Date.now(), {
+        type: "basic",
+        iconUrl: notification_icon,
+        title: "Boox PushRead",
+        message: `Web sayfası PushRead'e gönderildi: ${title || url}`,
+        priority: 1
+      }, (nid) => {
+        setTimeout(() => { chrome.notifications.clear(nid); }, 4000);
+      });
+      return { success: true };
+    } else {
+      throw new Error(json?.message || `HTTP ${res.status}`);
+    }
+  } catch (err) {
+    console.error('pushUrl error:', err);
+    chrome.notifications.create('pushUrlFailed' + Date.now(), {
+      type: "basic",
+      iconUrl: notification_icon,
+      title: "Gönderim Başarısız",
+      message: `Hata: ${err.message}`,
+      priority: 1
+    });
+    return { success: false, error: err.message };
+  }
+}
+
+// Runtime mesajlarını dinle
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  if (message && message.action === 'syncTokenFromPage') {
+    verifyAndSaveUser(message.token, message.domain, message.devices);
+    sendResponse({ status: 'received' });
+    return true;
+  }
+
+  if (message && message.action === 'scanTabs') {
+    scanOpenBooxTabs().then((found) => {
+      sendResponse({ status: found ? 'ok' : 'not_found' });
+    });
+    return true;
+  }
+
+  if (message && message.action === 'pushUrl') {
+    pushUrlToBoox(message.url, message.title).then((res) => {
+      sendResponse(res);
+    });
+    return true;
+  }
+
+  if (message && message.action === 'gotoLogin' && message.domain) {
+    gotoLogin(message.domain);
+    sendResponse({ status: 'ok' });
+    return true;
+  }
+
+  if (message && message.action === 'logout') {
+    chrome.storage.local.clear(() => {
+      sendResponse({ status: 'logged_out' });
+    });
+    return true;
+  }
+});
+
 chrome.tabs.onCreated.addListener(function(tab){
   const { openerTabId } = tab;
-  if( openedTabs[openerTabId] ){
+  if( openerTabId && openedTabs[openerTabId] ){
     openedTabs[tab.id] = tab;
   }
-})
+});
 
-// tab关闭时清理相关记录
 chrome.tabs.onRemoved.addListener(function (tabId){
   if(openedTabs[tabId]){
     delete openedTabs[tabId];
   }
 });
 
-// 监听ajax请求，寻找登录成功的 特征
-chrome.webRequest.onCompleted.addListener(function(details){
-  const { tabId, url, type, statusCode } = details;
-
-  // 只关心ajax请求
-  if( type !== 'xmlhttprequest' ){
-    return;
-  }
-
-  if( statusCode !== 200 ){
-    return;
-  }
-
-  // 注意：这个特征请求可能随时会变动
-  if(
-    !url.includes('users/getDevice/')  // 升级笔记功能之前的旧版网站，是直接进入推送界面的
-    && !url.includes('/im/getSig') // 新版在线笔记功能
-  ){
-    return;
-  }
-
-  const siteDomain = (new URL(url)).hostname;
-
-  // 确定是登录成功了，从localstorage中取回token
-
-  // 用content-script拿到token
-  chrome.tabs.executeScript(tabId, {
-    code: `
-      ['token'].reduce( (r, n) => {
-        r[n] = localStorage.getItem(n);
-        return r;
-      }, {});
-    `
-  }, async function(r) {
-    // 返回的r是个数组
-    const token = r[0].token;
-    console.log('got token: ', token);
-
-    const userinfo = await fetch(`http://${siteDomain}/api/1/users/me`, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    }).then(response => response.json());
-    const user = {
-      token: token,
-      userName: userinfo.data.nickname,
-      userId: userinfo.data.id,
-      userUid: userinfo.data.uid,
-      avatarUrl: userinfo.data.avatarUrl
-    }
-
-    // 不自动销毁窗口
-    // chrome.tabs.remove(tab.id);
-    loginSuccess(user, siteDomain);
-
-    // 如果是用户在此extension上主动触发的登录
-    // 给一个notification提示
-    if( openedTabs[tabId] ){
-      chrome.notifications.create('loginSuccess'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,  // TODO: user.avatarUrl 将图片取回来用blob显示
-        title: "BooxPrinter",
-        message: chrome.i18n.getMessage("login_success", [user.userName]),
-        priority: 1,
-      }, function(nid){
-        // 4s 后自动关闭
-        setTimeout(() => {
-          chrome.notifications.clear(nid);
-        }, 4000)
-      });
-      delete openedTabs[tabId];
-    }
-  });
-}, {urls: ["*://send2boox.com/*", "*://push.boox.com/*"]});
-
-// 登录成功，token存起来，界面上修改提示状态
-function loginSuccess(user, siteDomain){
-  const data = Object.assign({
-    boox_auth_token: user.token,
-    siteDomain, // 此账号所属站点
-    version: VERSION, // 当前插件版本（升级时判断）
-  }, user);
-
-  chrome.storage.local.set(data, function() {
-    console.log('已存储：', JSON.stringify(data));
-  });
-}
-
-
-// 处理桌面通知交互
-chrome.notifications.onClicked.addListener(function (nid){
-  console.log('notification onClick: ', nid);
-  // 推送失败 401错误的消息 点击去登录
-  if( nid.indexOf('gotoLogin') === 0){
-    gotoLogin();
-  }
-});
-chrome.notifications.onClosed.addListener(function (nid, byUser){
-  console.log('notification onClose: ', nid, byUser)
-});
-chrome.notifications.onButtonClicked.addListener(function (nid, btnIndex){
-  console.log('notification onBtnClick: ', nid, btnIndex);
-});
-
-// 从storage中取共享的token 无论是否存在
 async function getToken(){
   return new Promise((resolve, reject) => {
-
-    chrome.storage.local.get(['boox_auth_token', 'siteDomain', 'version', 'userUid'], function(result) {
+    chrome.storage.local.get(['boox_auth_token', 'siteDomain', 'version', 'userUid', 'userId', 'userDevices'], function(result) {
       const token = result.boox_auth_token;
-      const { siteDomain, userUid } = result;
+      const siteDomain = result.siteDomain;
+      let userUid = result.userUid || result.userId;
+      const savedDevices = result.userDevices || [];
 
-      // 提示重新登录 才能拿到账号的站点
-      if( !siteDomain || !userUid ){
-        return reject( new Error(chrome.i18n.getMessage("please_login_first")) );
+      if( !token || !siteDomain || !userUid ){
+        return reject( new Error(chrome.i18n.getMessage("please_login_first") || "Lütfen önce Boox hesabınıza giriş yapın.") );
       }
 
-      resolve({ token, siteDomain, userUid });
+      resolve({ token, siteDomain, userUid, savedDevices });
     });
-  })
+  });
 }
 
-// printer Provider
+// Printer Provider
 chrome.printerProvider.onGetPrintersRequested.addListener(async function(e) {
   e([{
     id: "Print to Boox",
@@ -283,183 +369,371 @@ chrome.printerProvider.onGetPrintersRequested.addListener(async function(e) {
 });
 
 chrome.printerProvider.onGetCapabilityRequested.addListener(function(e, r) {
-  console.log('onGetCapabilityRequested()', e, r);
   return r(cdd);
 });
 
-chrome.printerProvider.onPrintRequested.addListener(async function(e, r) {
-  console.log('onPrintRequested()', e, r)
+chrome.printerProvider.onPrintRequested.addListener(function(e, r) {
+  console.log('onPrintRequested triggered:', e);
 
-  try{
-    const res = await pushFile(e)
-    return r("OK");
-  }catch(e) {
-    ga('send', 'exception', e.message, e.stack);
-    console.error(`pushFile Failed: ${e}, ${e.stack}`);
-    return r("FAILED");
-  };
+  // Chrome'a hemen OK yanıtı ver ki yazdırma penceresi anında kapansın
+  r("OK");
+
+  // Dosya yükleme ve iletim arka planda kesintisiz çalışsın
+  pushFile(e).then(() => {
+    console.log('pushFile completed successfully');
+  }).catch((err) => {
+    ga('send', 'exception', err.message, err.stack);
+    console.error(`pushFile Failed: ${err}`, err);
+  });
 });
 
+async function getOssClient(API_PREFIX, token) {
+  const rawToken = token.replace(/^Bearer\s+/i, '');
+  let headers = { 'Authorization': `Bearer ${rawToken}` };
 
-async function getOssClient(API_PREFIX) {
-  // stss的有效期只有数分钟，不再缓存ossclient
-  // if( window.ossClient ){
-  //   return window.ossClient;
-  // }
-  // 因为有效期比auth短 每次都更新stsToken
-  const { data: creds } = await fetch(`${API_PREFIX}/stss/`, {
-    method: 'get'
-  }).then(response => response.json());
-  // { "result_code": 0, "message": "SUCCESS"
-  // "data": { "region": "oss-cn-shenzhen", "bucket": "onyx-cloud", "endpoint": "cloud.send2boox.com" }, }
-  const { data: zone } = await fetch(`${API_PREFIX}/push/bucket`, {
-    method: 'get'
-  }).then(response => response.json());
+  let creds = null;
+  try {
+    let credsRes = await fetch(`${API_PREFIX}/config/stss`, { method: 'GET', headers });
+    if (credsRes.ok) {
+      let j = await credsRes.json();
+      creds = j.data;
+    }
+  } catch(e) {}
 
-  const bucket = zone.bucket; // 'onyx-content';
-  const region = zone.region; //'oss-cn-shenzhen';
+  if (!creds || !creds.AccessKeyId) {
+    let credsRes = await fetch(`${API_PREFIX}/stss/`, { method: 'GET', headers });
+    if (credsRes.status === 401) {
+      credsRes = await fetch(`${API_PREFIX}/stss/`, { method: 'GET', headers: { 'Authorization': rawToken } });
+    }
+    let j = await credsRes.json();
+    creds = j.data;
+  }
+
+  let zone = {};
+  try {
+    let zoneRes = await fetch(`${API_PREFIX}/push/bucket`, { method: 'GET', headers });
+    if (zoneRes.status === 401) {
+      zoneRes = await fetch(`${API_PREFIX}/push/bucket`, { method: 'GET', headers: { 'Authorization': rawToken } });
+    }
+    let j = await zoneRes.json();
+    zone = j.data || {};
+  } catch(e) {}
+
+  const bucket = zone.bucket || creds?.bucket || 'onyx-cloud-us';
+  const region = zone.region || creds?.region || 'oss-us-west-1';
+
+  console.log(`OSS Client Init: Bucket=${bucket}, Region=${region}`);
 
   const client = new OSS({
     region: region,
     accessKeyId: creds.AccessKeyId,
     accessKeySecret: creds.AccessKeySecret,
     stsToken: creds.SecurityToken,
-    bucket: bucket
+    bucket: bucket,
+    secure: true
   });
   return client;
 }
 
-// {
-//   "contentType": "application/pdf",
-//   "document": "Blob",
-//   "printerId": "Print to Boox",
-//   "ticket": {
-//     "print": {
-//       "collate": {
-//         "collate": true
-//       },
-//       "color": {
-//         "type": "STANDARD_COLOR"
-//       },
-//       "copies": {
-//         "copies": 1
-//       },
-//       "duplex": {
-//         "type": "NO_DUPLEX"
-//       },
-//       "media_size": {
-//         "height_microns": 279400,
-//         "width_microns": 215900
-//       },
-//       "page_orientation": {
-//         "type": "PORTRAIT"
-//       }
-//     },
-//     "version": "1.0"
-//   },
-//   "title": "Cloud Device Description  |  Cloud Print  |  Google Developers"
-// }
-async function pushFile(task) {
+// Dosya adını Android / Boox dosya sistemi için güvenli hale getirme
+function sanitizeFilename(name) {
+  return (name || 'document')
+    .replace(/[/\\?%*:|"<>]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
+// Kullanıcının hesabına bağlı tüm Boox cihazlarını dinamik olarak çekme
+async function getUserDevices(token, API_PREFIX, savedDevices) {
+  const rawToken = token.replace(/^Bearer\s+/i, '');
+  let devices = Array.isArray(savedDevices) ? [...savedDevices] : [];
+
+  try {
+    const endpoints = [
+      `${API_PREFIX}/users/getDevice/`,
+      `${API_PREFIX}/users/deviceList`,
+      `${API_PREFIX}/devices`
+    ];
+
+    for (const ep of endpoints) {
+      try {
+        let res = await fetch(ep, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${rawToken}`
+          }
+        });
+        if (!res.ok) {
+          res = await fetch(ep, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': rawToken
+            }
+          });
+        }
+        if (res.ok) {
+          const json = await res.json();
+          if (json && json.data && Array.isArray(json.data) && json.data.length > 0) {
+            devices = json.data;
+            chrome.storage.local.set({ userDevices: devices });
+            break;
+          }
+        }
+      } catch(e){}
+    }
+  } catch (e) {
+    console.warn('getUserDevices failed:', e);
+  }
+
+  return devices;
+}
+
+// NeoCloud CouchDB / Sync Gateway üzerinden her kullanıcı ve cihaz için dinamik anında push
+async function sendToNeoCloud(siteDomain, userUid, token, data, client, devices) {
+  const rawToken = token.replace(/^Bearer\s+/i, '');
+  const now = Date.now();
+  const isoDate = new Date(now).toISOString();
+
+  // İndirme için pre-signed GET URL oluştur
+  let getUrl = '';
+  try {
+    getUrl = client.signatureUrl(data.resourceKey, {
+      expires: 3600 * 24 * 7,
+      response: {
+        'content-disposition': 'attachment'
+      }
+    });
+    if (getUrl.startsWith('http://')) {
+      getUrl = getUrl.replace('http://', 'https://');
+    }
+  } catch(e) {
+    console.warn('signatureUrl GET error:', e);
+  }
+
+  // Eğer kullanıcıda birden fazla cihaz varsa her birine, yoksa genel kanala yayınla
+  const targetDevices = (devices && devices.length > 0) ? devices : [{ mac: '', deviceModel: '' }];
+  const docs = [];
+
+  for (const dev of targetDevices) {
+    const uuid = Util.guid().replace(/-/g, '').substring(0, 24);
+    const mac = dev.mac || '';
+    const deviceModel = dev.deviceModel || dev.model || '';
+
+    const innerContent = {
+      category: [],
+      tags: [],
+      formats: [data.resourceType || "pdf"],
+      viewCount: 0,
+      downloadCount: 0,
+      commentsCount: 0,
+      size: data.size,
+      sourceType: 0,
+      childCount: 0,
+      pushNum: 1,
+      isFolder: "no",
+      parent: null,
+      _id: uuid,
+      storage: {
+        pdf: {
+          oss: {
+            displayName: data.name,
+            expires: 0,
+            key: data.resourceKey,
+            provider: "oss",
+            size: String(data.size),
+            bucket: data.bucket || "onyx-cloud-us",
+            url: getUrl
+          }
+        }
+      },
+      userId: userUid,
+      name: data.name,
+      ownerId: userUid,
+      title: data.name,
+      distributeChannel: "onyx",
+      guid: uuid,
+      mac: mac,
+      deviceModel: deviceModel,
+      updatedAt: now
+    };
+
+    docs.push({
+      _id: uuid,
+      contentType: "digital_content",
+      createdAt: isoDate,
+      dbId: `${userUid}-MESSAGE`,
+      msgType: 2,
+      name: data.name,
+      size: data.size,
+      uniqueId: uuid,
+      updatedAt: now,
+      user: userUid,
+      check: true,
+      content: JSON.stringify(innerContent)
+    });
+  }
+
+  const payload = { docs };
+  console.log('Sending dynamic docs to NeoCloud Sync Gateway (_bulk_docs):', payload);
+
+  try {
+    const res = await fetch(`https://${siteDomain}/neocloud/_bulk_docs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${rawToken}`,
+        'accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const resJson = await res.json();
+    console.log('NeoCloud _bulk_docs response:', res.status, resJson);
+    return res.ok;
+  } catch(e) {
+    console.warn('sendToNeoCloud failed:', e);
+    return false;
+  }
+}
+
+async function pushFile(task) {
   ga('send', 'event', 'pushFile', 'start');
 
   const { contentType, document: fileBlob, title } = task;
-  // 写入推送消息
+
   async function postData(data, token, API_PREFIX) {
-    // const json = {
-    //     "data":{
-    //         "name":"西潮与新潮_-_蒋梦麟.epub",
-    //         "title":"西潮与新潮_-_蒋梦麟.epub",
-    //         "resourceType":"epub",
-    //         "resourceKey":"dba1c1e3207b0592ed2643e425ffd6a5.epub",
-    //         "resourceDisplayName":"西潮与新潮_-_蒋梦麟.epub"
-    //     },
-    //     "type":"digital_content"
-    // };
-    var obj = {
+    const rawToken = token.replace(/^Bearer\s+/i, '');
+    const bearerToken = `Bearer ${rawToken}`;
+    
+    const obj = {
       data: data,
-      type: 'digital_content'
+      type: 'digital_content',
+      all: true,
+      push: true,
+      needPush: 1
     };
-    return await fetch(`${API_PREFIX}/push/saveAndPush`,{
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+
+    console.log('Sending saveAndPush payload:', JSON.stringify(obj));
+
+    let res = await fetch(`${API_PREFIX}/push/saveAndPush`, {
+      method: 'POST',
+      cache: 'no-cache',
       headers: {
         'Content-Type': 'application/json',
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': token, //window.auth,
+        'Authorization': bearerToken,
       },
-      redirect: 'follow', // manual, *follow, error
-      // referrer: 'no-referrer', // no-referrer, *client
       body: JSON.stringify(obj)
     });
-  };
 
-  // 从 print task 上取信息
-  function dataObj(userUid) {
-    var ext = contentType.split('/').pop();
-    // 官网源码：this.local.get("userUid") + "/push/" + m.a.uuid() + "." + r
+    let json = null;
+    try {
+      json = await res.json();
+    } catch(e) {}
+
+    if (!res.ok || (json && json.result_code !== 0 && json.code !== 0 && json.code !== 200 && json.result_code !== undefined)) {
+      res = await fetch(`${API_PREFIX}/push/saveAndPush`, {
+        method: 'POST',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': rawToken,
+        },
+        body: JSON.stringify(obj)
+      });
+      try {
+        json = await res.json();
+      } catch(e) {}
+    }
+
+    return { res, json };
+  }
+
+  function dataObj(userUid, fileSize) {
+    var ext = (contentType.split('/').pop() || 'pdf').toLowerCase();
+    if (ext.includes('pdf')) ext = 'pdf';
     var key = `${userUid}/push/${Util.uuid()}.${ext}`;
-    var data = {};
-    const filename = `${title}.${ext}`;  // 必须带上正确的扩展名，否则阅读器上无法正常下载
-    data.name = filename;
-    data.title = filename;
-    data.resourceType = ext;
-    data.resourceKey = key;
-    data.resourceDisplayName = filename;
-    return data;
-  };
+    var cleanTitle = sanitizeFilename(title);
+    var filename = `${cleanTitle}.${ext}`;
+    
+    return {
+      name: filename,
+      title: filename,
+      resourceType: ext,
+      resourceKey: key,
+      resourceDisplayName: filename,
+      size: fileSize,
+      storageType: 1,
+      needPush: 1,
+      push: true
+    };
+  }
 
   let data = {};
 
   try{
-    const { token, siteDomain, userUid } = await getToken();
-    data = dataObj(userUid);
-    const API_PREFIX = `http://${siteDomain}/api/1`;
-    // 上传到OSS
-    const client = await getOssClient(API_PREFIX);
-    const ossRes = await client.put(data.resourceKey, fileBlob);
-    // 推送
-    data.bucket = client.options.bucket; // boox多站点之后的新参数
-    const res = await postData(data, token, API_PREFIX);
+    const { token, siteDomain, userUid, savedDevices } = await getToken();
+    const API_PREFIX = `https://${siteDomain}/api/1`;
+    
+    // 1. Binary ArrayBuffer al
+    const arrayBuffer = await fileBlob.arrayBuffer();
+    data = dataObj(userUid, arrayBuffer.byteLength);
+    
+    // 2. OSS istemcisini al
+    const client = await getOssClient(API_PREFIX, token);
+    
+    // 3. Pre-signed PUT URL oluştur ve yükle
+    let putUrl = client.signatureUrl(data.resourceKey, {
+      method: 'PUT',
+      'Content-Type': contentType || 'application/pdf'
+    });
+    if (putUrl.startsWith('http://')) {
+      putUrl = putUrl.replace('http://', 'https://');
+    }
 
-    // 如果未登录
-    if( res.status === 401 ){
-      chrome.notifications.create('gotoLogin'+ Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: "BooxPrinter",
-        message: chrome.i18n.getMessage("please_login_first", [siteDomain]),
-        priority: 1,
-      });
-      return;
+    console.log('Uploading PDF directly to OSS:', putUrl);
+    const uploadRes = await fetch(putUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': contentType || 'application/pdf'
+      },
+      body: arrayBuffer
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error(`OSS Upload hatası: HTTP ${uploadRes.status}`);
     }
-    // 如果api请求失败
-    if( res.status !== 200 ){
-      throw new Error(`http status = ${res.status}`);
-    }
+    console.log('OSS upload başarılı, dosya boyutu:', arrayBuffer.byteLength);
+    
+    // 4. Boox API'ye kaydet (saveAndPush)
+    data.bucket = client.options.bucket;
+    const { res, json } = await postData(data, token, API_PREFIX);
+
+    console.log('Boox saveAndPush API yanıtı:', json);
+
+    // 5. Giriş yapan kullanıcının kendi Boox cihazlarını dinamik keşfet ve NeoCloud'a ilet
+    const devices = await getUserDevices(token, API_PREFIX, savedDevices);
+    await sendToNeoCloud(siteDomain, userUid, token, data, client, devices);
 
     chrome.notifications.create('pushSuccess'+ Date.now(), {
       type: "basic",
       iconUrl: notification_icon,
       title: "BooxPrinter",
-      message: chrome.i18n.getMessage("push_success", [data.name]),
-      //expandedMessage: "",
+      message: `Başarıyla gönderildi: ${data.name}`,
       priority: 1,
     }, function(nid){
-      // 4s 后自动关闭
       setTimeout(() => {
         chrome.notifications.clear(nid);
-      }, 4000)
+      }, 4000);
     });
     ga('send', 'event', 'pushFile', 'success');
 
   } catch(e){
-    //TODO: 失败的任务 如果已经上传oss，可以续传
     chrome.notifications.create('pushFailed'+ Date.now(), {
       type: "basic",
       iconUrl: notification_icon,
-      title: chrome.i18n.getMessage("push_failed_title", [data.name]),
-      message: `Error: ${e.message}`,
+      title: "Gönderim Başarısız",
+      message: `Hata: ${e.message}`,
       priority: 1,
     });
     ga('send', 'event', 'pushFile', 'failed', e.message);
@@ -467,10 +741,3 @@ async function pushFile(task) {
     throw e;
   }
 }
-
-// function cutString(str, n){
-//   if( str.length > n ){
-//     return `${str.substr(n)}...`;
-//   }
-//   return str;
-// }

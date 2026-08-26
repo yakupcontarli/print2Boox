@@ -1,14 +1,23 @@
 {
   "name": "Print to Boox",
-  "version": "0.0.8",
-  "description": "Print any page to Boox reader (via boox push service)",
+  "version": "0.0.9",
+  "description": "Print any page or send URL to Boox reader (via boox push service)",
   "options_page": "options.html",
   "default_locale": "en_GB",
   "background": {
-    "scripts": ["aliyun-oss-sdk-6.0.0.min.js", "analytics.js", "error.js", "background.js"],
-    "persistent": true
+    "service_worker": "background.js"
   },
-  "browser_action": {
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.boox.com/*",
+        "*://*.send2boox.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
     "default_popup": "popup.html",
     "default_title": "Print to Boox",
     "default_icon": {
@@ -24,7 +33,20 @@
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
   },
-  "permissions": [ "*://send2boox.com/", "*://push.boox.com/", "printerProvider", "notifications", "storage", "webRequest" ],
-  
-  "manifest_version": 2
+  "permissions": [
+    "printerProvider",
+    "notifications",
+    "storage",
+    "webRequest",
+    "scripting",
+    "tabs",
+    "contextMenus",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.send2boox.com/*",
+    "*://*.boox.com/*",
+    "*://*.aliyuncs.com/*"
+  ],
+  "manifest_version": 3
 }
