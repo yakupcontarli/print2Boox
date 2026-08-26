@@ -1,21 +1,33 @@
 # Print to Boox (Manifest V3)
 
-[🇹🇷 Türkçe](#türkçe) | [🇬🇧 English](#english)
+[🇹🇷 Türkçe](#türkçe) | [🇬🇧 English](#english) | [📦 Kurulum / Installation](INSTALL.md) | [🚀 Releases](https://github.com/yakupcontarli/print2Boox/releases)
 
 ---
 
 <a name="türkçe"></a>
 ## 🇹🇷 Türkçe Açıklama
 
-**Print to Boox**, Google Chrome üzerinden gezindiğiniz herhangi bir web sayfasını veya açtığınız herhangi bir PDF dosyasını tek tıkla **Onyx Boox** e-kitap okuyucu cihazınıza aktarmanızı sağlayan modern bir Manifest V3 Chrome eklentisidir.
+**Print to Boox**, Google Chrome, Microsoft Edge, Brave ve Mozilla Firefox üzerinden gezindiğiniz herhangi bir web sayfasını veya açtığınız herhangi bir PDF dosyasını tek tıkla **Onyx Boox** e-kitap okuyucu cihazınıza aktarmanızı sağlayan modern bir Manifest V3 tarayıcı eklentisidir.
 
 > ℹ️ **Kaynak & Kredi:** Bu proje, [deemstone/print2Boox](https://github.com/deemstone/print2Boox) açık kaynaklı Manifest V2 projesi temel alınarak günümüz standartlarına uyarlanmış, baştan sona modernize edilmiş ve yeni özelliklerle zenginleştirilmiş halidir.
 
 ### 🌟 Özellikler
-- **🖨️ Tam Formatlı PDF Yazdırma (`Ctrl + P`):** Herhangi bir web sayfasını, makaleyi veya yerel PDF dosyasını Chrome'un yazdırma menüsünden (*Print to Boox* seçerek) cihazınıza kitap/belge olarak anında gönderin.
+- **🖨️ Tam Formatlı PDF Yazdırma (`Ctrl + P`):** Herhangi bir web sayfasını, makaleyi veya yerel PDF dosyasını Chrome/Edge yazdırma menüsünden (*Print to Boox* seçerek) cihazınıza kitap/belge olarak anında gönderin.
 - **🌐 Tek Tıkla PushRead (Webpage Gönderimi):** Sayfayı e-okuma modunda okumak için eklenti simgesinden veya sağ tık menüsünden tek tıkla Boox PushRead servisine iletin.
 - **⚡ Otomatik Cihaz Senkronizasyonu (NeoCloud Sync):** Dosyalar web paneline girmeye veya ek butona basmaya gerek kalmadan, doğrudan cihazınızın ekranına ve BooxDrop gelen kutusuna canlı olarak düşer.
 - **🌍 Tüm Sunucu ve Modellerle Uyumlu:** Global (`push.boox.com`), Avrupa (`eur.boox.com`), ABD (`us.boox.com`) ve Çin (`send2boox.com`) sunucularını ve tüm Boox modellerini (Note Air, Palma, Tab Ultra, Nova, Page, Poke vb.) destekler.
+
+---
+
+### 📦 İndirme & Kurulum (Downloads)
+Detaylı anlatım için [**INSTALL.md (Kurulum Rehberi)**](INSTALL.md) dosyasına bakabilirsiniz.
+
+| Tarayıcı | Paket Formatı | Doğrudan İndir |
+| :--- | :--- | :--- |
+| **Chrome / Edge / Brave** | `.crx` (Önerilen) | [**`print2Boox-Chrome.crx`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.crx) |
+| **Chrome / Edge / Brave** | `.zip` (Klasör) | [**`print2Boox-Chrome.zip`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.zip) |
+| **Mozilla Firefox** | `.xpi` (Önerilen) | [**`print2Boox-Firefox.xpi`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.xpi) |
+| **Mozilla Firefox** | `.zip` (Arşiv) | [**`print2Boox-Firefox.zip`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.zip) |
 
 ---
 
@@ -48,15 +60,27 @@ Bu proje, [deemstone/print2Boox](https://github.com/deemstone/print2Boox) orijin
 <a name="english"></a>
 ## 🇬🇧 English Description
 
-**Print to Boox** is a modern Manifest V3 Google Chrome extension that allows you to seamlessly send any webpage, article, or PDF document directly to your **Onyx Boox** e-reader device with a single click.
+**Print to Boox** is a modern Manifest V3 browser extension for Google Chrome, Microsoft Edge, Brave, and Mozilla Firefox that allows you to seamlessly send any webpage, article, or PDF document directly to your **Onyx Boox** e-reader device with a single click.
 
 > ℹ️ **Credits & Origin:** This project is a modernized, enhanced, and rewritten Manifest V3 version based on the original open-source [deemstone/print2Boox](https://github.com/deemstone/print2Boox) project.
 
 ### 🌟 Key Features
-- **🖨️ Full-Layout PDF Printing (`Ctrl + P`):** Print any webpage or opened PDF file directly to your Boox e-reader library via Chrome's native print menu (*Print to Boox*).
+- **🖨️ Full-Layout PDF Printing (`Ctrl + P`):** Print any webpage or opened PDF file directly to your Boox e-reader library via Chrome/Edge native print menu (*Print to Boox*).
 - **🌐 One-Click PushRead (Webpage Push):** Send clean article/webpage clippings directly to your Boox PushRead app from the popup or right-click context menu.
 - **⚡ Instant Real-Time Device Sync (NeoCloud):** Files automatically drop into your Boox device's BooxDrop / Push notification queue without requiring manual web dashboard interaction.
 - **🌍 Universal Compatibility:** Fully supports all Boox cloud server regions (Global `push.boox.com`, Europe `eur.boox.com`, US `us.boox.com`, China `send2boox.com`) and all Onyx Boox models (Note Air, Palma, Tab Ultra, Nova, Page, Poke, etc.).
+
+---
+
+### 📦 Downloads & Installation
+For complete step-by-step instructions, see [**INSTALL.md (Installation Guide)**](INSTALL.md).
+
+| Browser | Package Format | Direct Download |
+| :--- | :--- | :--- |
+| **Chrome / Edge / Brave** | `.crx` (Recommended) | [**`print2Boox-Chrome.crx`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.crx) |
+| **Chrome / Edge / Brave** | `.zip` (Folder) | [**`print2Boox-Chrome.zip`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.zip) |
+| **Mozilla Firefox** | `.xpi` (Recommended) | [**`print2Boox-Firefox.xpi`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.xpi) |
+| **Mozilla Firefox** | `.zip` (Archive) | [**`print2Boox-Firefox.zip`**](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.zip) |
 
 ---
 
