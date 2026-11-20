@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       actionStatus.innerText = 'Sayfa gönderiliyor...';
 
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (!tab || !tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('edge://')) {
+      if (!tab || !tab.url || /^(chrome|edge|about|moz-extension|chrome-extension):\/\//i.test(tab.url) || tab.url.startsWith('about:')) {
         actionStatus.style.color = '#d32f2f';
         actionStatus.innerText = 'Bu sayfa gönderilemez.';
         return;

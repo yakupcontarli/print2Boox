@@ -1,8 +1,7 @@
 {
   "name": "Print to Boox",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Print any page or send URL to Boox reader (via boox push service)",
-  "options_page": "options.html",
   "default_locale": "en_GB",
   "background": {
     "service_worker": "background.js"
@@ -37,7 +36,6 @@
     "printerProvider",
     "notifications",
     "storage",
-    "webRequest",
     "scripting",
     "tabs",
     "contextMenus",

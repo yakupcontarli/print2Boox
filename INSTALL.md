@@ -14,7 +14,7 @@ Print to Boox eklentisini **Google Chrome**, **Microsoft Edge**, **Brave** veya 
 ### 🌐 A) Chrome, Edge, Brave, Opera İçin Kurulum
 
 #### 🌟 1. Yöntem: `.crx` Dosyası ile Kurulum (En Hızlı Yöntem)
-1. **İndirin:** [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Chrome.crx`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.crx)** dosyasını indirin.
+1. **İndirin:** [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Chrome.crx`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Chrome.crx)** dosyasını indirin.
 2. **Eklentiler Sayfasını Açın:** 
    - Chrome için: `chrome://extensions`
    - Edge için: `edge://extensions`
@@ -24,7 +24,7 @@ Print to Boox eklentisini **Google Chrome**, **Microsoft Edge**, **Brave** veya 
 5. **Onaylayın:** *"Uzantıyı Ekle"* butonuna tıklayın.
 
 #### 📂 2. Yöntem: `.zip` (Klasör) ile Kurulum
-1. [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Chrome.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.zip)** dosyasını indirin ve bir klasöre çıkartın.
+1. [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Chrome.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Chrome.zip)** dosyasını indirin ve bir klasöre çıkartın.
 2. `chrome://extensions` sayfasına gidin ve **Geliştirici modu**nu açın.
 3. Sol üstteki **"Paketlenmemiş öğe yükle" (Load unpacked)** butonuna tıklayıp çıkardığınız klasörü seçin.
 
@@ -33,10 +33,10 @@ Print to Boox eklentisini **Google Chrome**, **Microsoft Edge**, **Brave** veya 
 ### 🦊 B) Mozilla Firefox İçin Kurulum
 
 #### 1. Yöntem: `.xpi` veya `.zip` ile Kurulum
-1. **İndirin:** [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Firefox.xpi`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.xpi)** veya **[`print2Boox-Firefox.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.zip)** dosyasını indirin.
+1. **İndirin:** [Releases](https://github.com/yakupcontarli/print2Boox/releases) sayfasından **[`print2Boox-Firefox.xpi`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Firefox.xpi)** veya **[`print2Boox-Firefox.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Firefox.zip)** dosyasını indirin.
 2. Firefox'ta adres çubuğuna **`about:debugging#/runtime/this-firefox`** yazıp Enter'a basın.
 3. **"Geçici Eklenti Yükle..." (Load Temporary Add-on)** butonuna tıklayın.
-4. İndirdiğiniz dosyayı seçin. Eklenti Firefox'ta hemen aktif hale gelecektir!
+4. İndirdiğiniz dosyayı seçin. Eklenti Firefox'ta hemen aktif hale gelecektir! *(Not: Firefox'ta `printerProvider` API'si bulunmadığından PushRead ile sayfa gönderimi desteklenir; `Ctrl + P -> Print to Boox` özelliği Chromium tabanlı tarayıcılara özeldir.)*
 
 ---
 
@@ -59,7 +59,7 @@ Follow the steps below to install the Print to Boox extension on **Google Chrome
 ### 🌐 A) Installation for Chrome, Edge, Brave, Opera
 
 #### 🌟 Method 1: Installing via `.crx` File (Fastest)
-1. **Download:** Download **[`print2Boox-Chrome.crx`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.crx)** from the [Releases](https://github.com/yakupcontarli/print2Boox/releases) page.
+1. **Download:** Download **[`print2Boox-Chrome.crx`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Chrome.crx)** from the [Releases](https://github.com/yakupcontarli/print2Boox/releases) page.
 2. **Open Extensions Page:**
    - On Google Chrome: navigate to `chrome://extensions`
    - On Microsoft Edge: navigate to `edge://extensions`
@@ -69,7 +69,7 @@ Follow the steps below to install the Print to Boox extension on **Google Chrome
 5. **Confirm:** Click **"Add extension"** on the confirmation prompt.
 
 #### 📂 Method 2: Installing via `.zip` (Unpacked Folder)
-1. Download **[`print2Boox-Chrome.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Chrome.zip)** from Releases and extract it to a folder.
+1. Download **[`print2Boox-Chrome.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Chrome.zip)** from Releases and extract it to a folder.
 2. Navigate to `chrome://extensions` and enable **Developer mode**.
 3. Click **"Load unpacked"** in the top-left corner and select the extracted folder.
 
@@ -78,10 +78,10 @@ Follow the steps below to install the Print to Boox extension on **Google Chrome
 ### 🦊 B) Installation for Mozilla Firefox
 
 #### Method 1: Installing via `.xpi` or `.zip`
-1. **Download:** Download **[`print2Boox-Firefox.xpi`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.xpi)** or **[`print2Boox-Firefox.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.9/print2Boox-Firefox.zip)** from Releases.
+1. **Download:** Download **[`print2Boox-Firefox.xpi`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Firefox.xpi)** or **[`print2Boox-Firefox.zip`](https://github.com/yakupcontarli/print2Boox/releases/download/v0.0.10/print2Boox-Firefox.zip)** from Releases.
 2. Open Firefox and navigate to **`about:debugging#/runtime/this-firefox`** in the address bar.
 3. Click on the **"Load Temporary Add-on..."** button.
-4. Select the downloaded file. The extension will be instantly active on Firefox!
+4. Select the downloaded file. The extension will be instantly active on Firefox! *(Note: Because `printerProvider` is a Chromium-only API, Firefox supports PushRead webpage sending, while `Ctrl + P -> Print to Boox` works on Chromium-based browsers.)*
 
 ---
 

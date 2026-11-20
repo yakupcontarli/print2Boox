@@ -13,7 +13,9 @@ self.document = {
 var document = self.document;
 var window = self;
 
-importScripts('aliyun-oss-sdk-6.0.0.min.js');
+if (typeof importScripts === 'function') {
+  importScripts('aliyun-oss-sdk-6.0.0.min.js');
+}
 
 const ga = function(...args) {
   console.log('[Analytics]:', ...args);
@@ -38,6 +40,7 @@ const CAPABILITIES = ' {      "version": "1.0",      "printer": {       "support
 const cdd = JSON.parse(CAPABILITIES);
 
 const openedTabs = {};
+let lastNotifiedSession = '';
 
 // Sağ tık menüsü oluştur
 chrome.runtime.onInstalled.addListener(() => {
@@ -105,6 +108,12 @@ async function verifyAndSaveUser(token, siteDomain, extraDevices) {
     const json = await res.json();
     if (json && json.data) {
       const uid = json.data.uid || json.data.userUid || json.data.id;
+      const sessionKey = `${siteDomain}|${uid}`;
+      const prev = await chrome.storage.local.get(['boox_auth_token', 'siteDomain', 'userUid']);
+      const isNewLogin = !prev.boox_auth_token ||
+        prev.siteDomain !== siteDomain ||
+        String(prev.userUid || '') !== String(uid);
+
       const user = {
         boox_auth_token: rawToken,
         siteDomain: siteDomain,
@@ -123,15 +132,18 @@ async function verifyAndSaveUser(token, siteDomain, extraDevices) {
       await chrome.storage.local.set(user);
       console.log('User verified and saved:', user);
 
-      chrome.notifications.create('loginSuccess' + Date.now(), {
-        type: "basic",
-        iconUrl: notification_icon,
-        title: "Print to Boox",
-        message: `Giriş başarılı: ${user.userName} (${siteDomain})`,
-        priority: 1
-      }, (nid) => {
-        setTimeout(() => { chrome.notifications.clear(nid); }, 4000);
-      });
+      if (isNewLogin && lastNotifiedSession !== sessionKey) {
+        lastNotifiedSession = sessionKey;
+        chrome.notifications.create('loginSuccess' + Date.now(), {
+          type: "basic",
+          iconUrl: notification_icon,
+          title: "Print to Boox",
+          message: `Giriş başarılı: ${user.userName} (${siteDomain})`,
+          priority: 1
+        }, (nid) => {
+          setTimeout(() => { chrome.notifications.clear(nid); }, 4000);
+        });
+      }
 
       return true;
     }
@@ -323,6 +335,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   }
 
   if (message && message.action === 'logout') {
+    lastNotifiedSession = '';
     chrome.storage.local.clear(() => {
       sendResponse({ status: 'logged_out' });
     });
@@ -360,32 +373,34 @@ async function getToken(){
   });
 }
 
-// Printer Provider
-chrome.printerProvider.onGetPrintersRequested.addListener(async function(e) {
-  e([{
-    id: "Print to Boox",
-    name: "Print to Boox"
-  }]);
-});
-
-chrome.printerProvider.onGetCapabilityRequested.addListener(function(e, r) {
-  return r(cdd);
-});
-
-chrome.printerProvider.onPrintRequested.addListener(function(e, r) {
-  console.log('onPrintRequested triggered:', e);
-
-  // Chrome'a hemen OK yanıtı ver ki yazdırma penceresi anında kapansın
-  r("OK");
-
-  // Dosya yükleme ve iletim arka planda kesintisiz çalışsın
-  pushFile(e).then(() => {
-    console.log('pushFile completed successfully');
-  }).catch((err) => {
-    ga('send', 'exception', err.message, err.stack);
-    console.error(`pushFile Failed: ${err}`, err);
+// Printer Provider (Chromium tabanlı tarayıcılar için)
+if (chrome.printerProvider) {
+  chrome.printerProvider.onGetPrintersRequested.addListener(async function(e) {
+    e([{
+      id: "Print to Boox",
+      name: "Print to Boox"
+    }]);
   });
-});
+
+  chrome.printerProvider.onGetCapabilityRequested.addListener(function(e, r) {
+    return r(cdd);
+  });
+
+  chrome.printerProvider.onPrintRequested.addListener(function(e, r) {
+    console.log('onPrintRequested triggered:', e);
+
+    // Chrome'a hemen OK yanıtı ver ki yazdırma penceresi anında kapansın
+    r("OK");
+
+    // Dosya yükleme ve iletim arka planda kesintisiz çalışsın
+    pushFile(e).then(() => {
+      console.log('pushFile completed successfully');
+    }).catch((err) => {
+      ga('send', 'exception', err.message, err.stack);
+      console.error(`pushFile Failed: ${err}`, err);
+    });
+  });
+}
 
 async function getOssClient(API_PREFIX, token) {
   const rawToken = token.replace(/^Bearer\s+/i, '');

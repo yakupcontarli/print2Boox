@@ -1,6 +1,8 @@
 // content.js - Boox Web Sitelerinden Oturum ve Cihaz Bilgilerini Otomatik Çekme
 'use strict';
 
+let lastSyncedSignature = '';
+
 function extractAndSyncAuth() {
   const hostname = window.location.hostname;
   let token = null;
@@ -75,6 +77,10 @@ function extractAndSyncAuth() {
   }
 
   if (token) {
+    const signature = `${hostname}|${token}|${devices.length}`;
+    if (signature === lastSyncedSignature) return;
+    lastSyncedSignature = signature;
+
     try {
       chrome.runtime.sendMessage({
         action: 'syncTokenFromPage',
